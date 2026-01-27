@@ -4,7 +4,6 @@ This folder contains R analysis scripts, data CSVs, and saved model objects used
 
 **Contents**
 
-*Folder: analysis*
 - `community_level_analysis.R`: R script that performs the community-level analysis. It typically loads `functions.R`, reads the community data CSV, fits or loads a model (using `brms` in the current workflow), creates figures, and saves results. Run interactively (source in RStudio) or with `Rscript` after ensuring required packages are installed.
 
 - `community_level_data.csv`: Tabular data (CSV) used by `community_level_analysis.R`. Contains the processed community-level variables used as input for modeling and plotting.
@@ -12,8 +11,6 @@ This folder contains R analysis scripts, data CSVs, and saved model objects used
 - `community_level_model.rds`: Saved R object (created with `saveRDS()`), typically a `brmsfit` or other fitted model used by `community_level_analysis.R`. Load with `readRDS('community_level_model.rds')` to inspect or generate predictions.
 
 - `individual_level_analysis.R`: R script that performs the individual-level analysis. Structure and usage are analogous to `community_level_analysis.R` but operate at the individual scale. It may produce plots and saved model objects.
-
-*Folder: analysis*
 
 - `individual_level_data.csv`: CSV file with the individual-level dataset used by `individual_level_analysis.R`.
 
