@@ -3,9 +3,9 @@
 This folder contains R analysis scripts, data CSVs, and saved model objects used for the community/individual/population-level DHGLM analyses for the paper "A new approach to quantify isotopic (co)variation across levels of biological organization using double-hierarchical generalized linear models."
 
 **Contents**
-* The 'data' folder contains the raw data for each level of biological organization.*
-* The 'analysis' folder contains the R script detailed commented for each level of biological organization.*
-* The 'models' folder contains the model saved as R object for each level of biological organization.*
+* The 'data' folder contains the raw data for each level of biological organization.
+* The 'analysis' folder contains the R script detailed commented for each level of biological organization.
+* The 'models' folder contains the model saved as R object for each level of biological organization.
   
 - `community_level_analysis.R`: R script that performs the community-level analysis. It typically loads `functions.R`, reads the community data CSV, fits or loads a model (using `brms` in the current workflow), creates figures, and saves results. Run interactively (source in RStudio) or with `Rscript` after ensuring required packages are installed.
 
