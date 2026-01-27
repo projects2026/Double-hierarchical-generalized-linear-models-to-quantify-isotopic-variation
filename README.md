@@ -1,6 +1,6 @@
 # DHGLMs analysis — README
 
-This folder contains R analysis scripts, data CSVs, and saved model objects used for the community/individual/population-level DHGLM analyses for the paper "A new approach to quantify isotopic (co)variation across levels of biological organization using double-hierarchical generalized linear models.
+This folder contains R analysis scripts, data CSVs, and saved model objects used for the community/individual/population-level DHGLM analyses for the paper "A new approach to quantify isotopic (co)variation across levels of biological organization using double-hierarchical generalized linear models."
 
 **Contents**
 * The 'data' folder contains the raw data for each level of biological organization.*
