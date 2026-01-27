@@ -13,6 +13,8 @@ This folder contains R analysis scripts, data CSVs, and saved model objects used
 
 - `individual_level_analysis.R`: R script that performs the individual-level analysis. Structure and usage are analogous to `community_level_analysis.R` but operate at the individual scale. It may produce plots and saved model objects.
 
+*Folder: analysis*
+
 - `individual_level_data.csv`: CSV file with the individual-level dataset used by `individual_level_analysis.R`.
 
 - `individual_level_model.rds`: Saved model object for the individual-level analysis. Load with `readRDS()`.
