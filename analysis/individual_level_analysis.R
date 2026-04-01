@@ -1,3 +1,7 @@
+# ========== INDIVIDUAL-LEVEL ISOTOPE NICHE ANALYSIS ==========
+# Analysis of among-individual variation in isotope niche with sex and foraging type effects
+# Uses DHGLM to model both mean isotope values and within-individual variance
+
 # Load required packages for Bayesian modeling, data manipulation, and visualization
 library(brms) # Bayesian regression models using Stan
 library(purrr) # Functional programming tools
@@ -23,7 +27,7 @@ form2 <- bf(d13C ~ Sexo + foraging + (1 | a | ID)) +
 
 # Fit the Bayesian DHGLM or load it if already fitted
 # This avoids re-running the computationally expensive model fitting
-if (!file.exists("individual_level_model.rds")) {
+if (!file.exists("models/individual_level_model.rds")) {
   model <- brm(
     formula = form1 + form2, # Combined mean + variance structure
     data = DF,
@@ -75,15 +79,18 @@ p_ind <- plot_blups(model, "ID") + # Custom function from functions.R
   ggtitle("A. australis") +
   theme(plot.title = element_text(size = 25))
 p_ind
+
 # Save high-resolution figure
-ggsave(
-  "individual_level_blups.png",
-  p_ind,
-  width = 12,
-  height = 8,
-  units = "in",
-  dpi = 300
-)
+if (!file.exists("figs/individual_level_blups.png")) {
+  ggsave(
+    "figs/individual_level_blups.png",
+    p_ind,
+    width = 12,
+    height = 8,
+    units = "in",
+    dpi = 300
+  )
+}
 
 
 # ========== VISUALIZATION: ELLIPSES (Bivariate Individual Variation) ==========
@@ -103,16 +110,18 @@ vars <- VarCorr(model, summary = FALSE)$ID$cov %>%
 # Create ellipse plot showing bivariate distribution of individual effects
 ind_ellipse_plot <- plots_ell(blup, vars) # Custom function from functions.R
 ind_ellipse_plot
-# Save high-resolution figure
-ggsave(
-  "individual_level_ellipses.png",
-  ind_ellipse_plot,
-  width = 20,
-  height = 15,
-  units = "in",
-  dpi = 300
-)
 
+# Save high-resolution figure
+if (!file.exists("figs/individual_level_ellipses.png")) {
+  ggsave(
+    "figs/individual_level_ellipses.png",
+    ind_ellipse_plot,
+    width = 20,
+    height = 15,
+    units = "in",
+    dpi = 300
+  )
+}
 
 # ========== EXTRACT INDIVIDUAL-LEVEL INTRA-INDIVIDUAL VARIANCE (rIIV) ==========
 
@@ -320,13 +329,14 @@ males_plot
 df_plot <- fem_plot + males_plot
 df_plot
 
-# Save combined figure as high-resolution TIFF for publication
-ggsave(
-  "individual level.tiff",
-  df_plot,
-  units = "px",
-  width = 8000, # 8000 pixels width
-  height = 5000, # 5000 pixels height
-  device = tiff,
-  dpi = 350 # 350 dots per inch for publication quality
-)
+# Save combined figure as high-resolution png for publication
+if (!file.exists("figs/individual_level_ridge_plots.png")) {
+  ggsave(
+    "figs/individual_level_ridge_plots.png",
+    df_plot,
+    width = 20,
+    height = 15,
+    units = "in",
+    dpi = 300 # 350 dpi for publication quality
+  )
+}

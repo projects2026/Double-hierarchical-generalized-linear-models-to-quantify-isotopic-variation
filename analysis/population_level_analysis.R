@@ -33,7 +33,7 @@ form2 <- bf(d15N ~ date + site_type2 + (1 | a | site)) +
   lf(sigma ~ date + site_type2 + (1 | a | site)) # Nitrogen model
 
 # Fit the Bayesian DHGLM or load if already fitted
-if (!file.exists("population_level_model.rds")) {
+if (!file.exists("models/population_level_model.rds")) {
   model <- brm(
     formula = form1 + form2, # Joint model for both isotopes
     data = DF,
@@ -81,15 +81,18 @@ summ_bayes(R_pop)
 p_pop <- plot_blups(model, "site") + # Custom function from functions.R
   theme(plot.title = element_text(size = 25))
 p_pop
-# Save high-resolution figure
-ggsave(
-  "population_level_blups.png",
-  p_pop,
-  width = 12,
-  height = 8,
-  units = "in",
-  dpi = 300
-)
+
+if (!file.exists("figs/population_level_blups.png")) {
+  # Save high-resolution figure
+  ggsave(
+    "figs/population_level_blups.png",
+    p_pop,
+    width = 12,
+    height = 8,
+    units = "in",
+    dpi = 300
+  )
+}
 
 
 ## Ellipse plots showing covariance structure
@@ -109,14 +112,17 @@ pop_ellipse_plot <- plots_ell(blup, vars) # Custom function from functions.R
 pop_ellipse_plot
 
 # Save high-resolution figure
-ggsave(
-  "population_level_ellipses.png",
-  pop_ellipse_plot,
-  width = 20,
-  height = 15,
-  units = "in",
-  dpi = 300
-)
+if (!file.exists("figs/population_level_ellipses.png")) {
+  ggsave(
+    "figs/population_level_ellipses.png",
+    pop_ellipse_plot,
+    width = 20,
+    height = 15,
+    units = "in",
+    dpi = 300
+  )
+}
+
 
 
 # ========== SITE-SPECIFIC WITHIN-POPULATION VARIANCE RIDGE PLOT ==========
@@ -205,11 +211,13 @@ pop_plot <- ggplot(
 
 pop_plot
 # Save high-resolution ridge plot
-ggsave(
-  "population_level_residual_intraunit_variance.png",
-  pop_plot,
-  width = 20,
-  height = 15,
-  units = "in",
-  dpi = 300
-)
+if (!file.exists("figs/population_level_residual_intraunit_variance.png")) {
+  ggsave(
+    "figs/population_level_residual_intraunit_variance.png",
+    pop_plot,
+    width = 20,
+    height = 15,
+    units = "in",
+    dpi = 300
+  )
+}

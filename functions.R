@@ -256,7 +256,7 @@ plot_blup_ell <- function(
         x = x,
         y = y
       ),
-      size = 1.2
+      linewidth = 1.2
     ) +
     # Add BLUP points showing unit-specific estimates
     geom_point(

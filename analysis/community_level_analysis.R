@@ -18,8 +18,8 @@ source("functions.R") # Load custom helper functions
 DF <- read.csv("data/community_level_data.csv") %>%
   mutate(
     mass_sc = scale(drymass), # Standardize body mass
-    d13C = scale(d13C), # Standardize Carbon isotope ratios
-    d15N = scale(d15N) # Standardize Nitrogen isotope ratios
+    d13C = scale(d13c), # Standardize Carbon isotope ratios
+    d15N = scale(d15n) # Standardize Nitrogen isotope ratios
   )
 
 # Define multivariate DHGLM formulas
@@ -29,7 +29,7 @@ form1 <- bf(d13C ~ (1 | a | species)) + lf(sigma ~ (1 | a | species)) # Carbon m
 form2 <- bf(d15N ~ (1 | a | species)) + lf(sigma ~ (1 | a | species)) # Nitrogen model
 
 # Fit the Bayesian DHGLM or load if already fitted
-if (!file.exists("community_level_model.rds")) {
+if (!file.exists("models/community_level_model.rds")) {
   model <- brm(
     formula = form1 + form2 + set_rescor(TRUE), # Enable residual correlation between isotopes
     data = DF,
@@ -77,16 +77,18 @@ summ_bayes(R_com)
 p_com <- plot_blups(model, "species") + # Custom function from functions.R
   theme(plot.title = element_text(size = 25))
 p_com
-# Save high-resolution figure
-ggsave(
-  "community_level_blups.png",
-  p_com,
-  width = 12,
-  height = 8,
-  units = "in",
-  dpi = 300
-)
 
+if (!file.exists("figs/community_level_blups.png")) {
+  # Save high-resolution figure
+  ggsave(
+    "figs/community_level_blups.png",
+    p_com,
+    width = 12,
+    height = 8,
+    units = "in",
+    dpi = 300
+  )
+}
 
 ## Ellipse plots showing covariance structure
 # Extract species-level BLUPs
@@ -103,14 +105,18 @@ vars <- VarCorr(model, summary = FALSE)$species$cov %>%
 com_ellipse_plot <- plots_ell(blup, vars) # Custom function from functions.R
 
 com_ellipse_plot
-ggsave(
-  "community_level_ellipses.png",
-  com_ellipse_plot,
-  width = 20,
-  height = 15,
-  units = "in",
-  dpi = 300
-)
+
+if (!file.exists("figs/community_level_ellipses.png")) {
+  # Save high-resolution figure
+  ggsave(
+    "figs/community_level_ellipses.png",
+    com_ellipse_plot,
+    width = 20,
+    height = 15,
+    units = "in",
+    dpi = 300
+  )
+}
 
 # ========== SPECIES-SPECIFIC WITHIN-SPECIES VARIANCE (rIIV) RIDGE PLOT ==========
 
@@ -194,12 +200,17 @@ spp_plot <- ggplot(
   theme(legend.position = "none")
 
 spp_plot
+
 # Save high-resolution ridge plot
-ggsave(
-  "community_level_intraspp_variance.png",
-  spp_plot,
-  width = 12,
-  height = 15,
-  units = "in",
-  dpi = 300
-)
+
+if (!file.exists("figs/community_level_intraspp_variance.png")) {
+  ggsave(
+    "figs/community_level_intraspp_variance.png",
+    spp_plot,
+    width = 12,
+    height = 15,
+    units = "in",
+    dpi = 300
+  )
+
+}
