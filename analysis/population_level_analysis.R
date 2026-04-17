@@ -134,11 +134,24 @@ comunidad1 <- as_draws_df(model)
 df_filtrado <- comunidad1 %>%
   select(starts_with("r_site__sigma_d"))
 
-# Back-transform rIIV from log scale to original variance scale
-# Reference: Hertel & Niemelä (2020) - guide for studying among-individual behavioral variation
-community.sp <- exp(df_filtrado)
-Sp.C <- community.sp[, c(1:17)] # Sites 1-17 for Carbon
-Sp.N <- community.sp[, c(18:34)] # Sites 1-17 for Nitrogen
+ fix_coef <- fixef(model, summary = TRUE)[, 1]
+
+  # Get population-level within-unit SD for Carbon
+  sig_d13C <- select(data.frame(t(fix_coef)), starts_with("sigma_d13C")) %>%
+    fn_int() %>%
+    unlist()
+
+  # Get population-level within-unit SD for Nitrogen
+  sig_d15N <- select(data.frame(t(fix_coef)), starts_with("sigma_d15N")) %>%
+    fn_int() %>%
+    unlist()
+
+# Extract fixed effects for later use in back-transformation
+# Back-transform rIIV from log scale to original scale
+# In DHGLMs, sigma is modeled on log scale, so exp() returns to sd scale
+
+Sp.C <- exp(df_filtrado[, c(1:17)] + sig_d13C) # Sites 1-17 for Carbon
+Sp.N <- exp(df_filtrado[, c(18:34)] + sig_d15N) # Sites 1-17 for Nitrogen
 
 # Reshape Carbon data from wide to long format
 df_Carbon <- Sp.C %>%
@@ -173,7 +186,7 @@ str(df_N)
 
 # Combine Carbon and Nitrogen data
 alls <- rbind(df_N, df_Carbon)
-Isotope <- factor(c(rep("Nitrogen", 27200), rep("Carbon", 27200))) # 27200 posterior samples per isotope
+Isotope <- factor(c(rep("Nitrogen", 17 * nrow(df_filtrado)), rep("Carbon", 17 * nrow(df_filtrado)))) # 17 * nrow(df_filtrado) posterior samples per isotope
 
 # Create dataframe with isotope labels
 df_largo4 <- data.frame(Isotope = Isotope)

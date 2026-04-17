@@ -20,10 +20,10 @@ DF <- read.csv("data/individual_level_data.csv")
 # Model both the mean (location) and variance (dispersion) of d13C
 # form1: Mean structure - d13C varies by sex and foraging strategy, with random intercepts by individual
 # form2: Variance structure - sigma (within-individual variance) also varies by sex, foraging, and individual
-form1 <- bf(d13C ~ Sexo + foraging + (1 | a | ID)) +
-  lf(sigma ~ Sexo + foraging + (1 | a | ID))
-form2 <- bf(d13C ~ Sexo + foraging + (1 | a | ID)) +
-  lf(sigma ~ Sexo + foraging + (1 | a | ID))
+form1 <- bf(d13C ~ Sexo * foraging + (1 | a | ID)) +
+  lf(sigma ~ Sexo * foraging + (1 | a | ID))
+form2 <- bf(d15N ~ Sexo * foraging + (1 | a | ID)) +
+  lf(sigma ~ Sexo * foraging + (1 | a | ID))
 
 # Fit the Bayesian DHGLM or load it if already fitted
 # This avoids re-running the computationally expensive model fitting
@@ -133,15 +133,33 @@ comunidad1 <- as_draws_df(model)
 df_filtrado <- comunidad1 %>%
   select(starts_with("r_ID__sigma_d"))
 
+  fix_coef <- fixef(model, summary = TRUE)[, 1]
+
+  # Get population-level within-unit SD for Carbon
+  sig_d13C <- select(data.frame(t(fix_coef)), starts_with("sigma_d13C")) %>%
+    fn_int() %>%
+    unlist()
+
+  # Get population-level within-unit SD for Nitrogen
+  sig_d15N <- select(data.frame(t(fix_coef)), starts_with("sigma_d15N")) %>%
+    fn_int() %>%
+    unlist()
+
+# Extract fixed effects for later use in back-transformation
 # Back-transform rIIV from log scale to original scale
 # In DHGLMs, sigma is modeled on log scale, so exp() returns to sd scale
-community.sp <- exp(df_filtrado)
+#community.sp <- exp(df_filtrado)
 
 # Split by isotope: columns 1-37 are Carbon (d13C), columns 38-74 are Nitrogen (d15N)
-Sp.C <- community.sp[, c(1:37)] # Individual-specific variance for Carbon
-Sp.N <- community.sp[, c(38:74)] # Individual-specific variance for Nitrogen
+# add mean variance for each isotope to the individual-specific variance estimates
+# This gives total variance for each individual (population-level + individual-level
+# variance components
+Sp.C <- exp(df_filtrado[, c(1:37)] + sig_d13C) # Individual-specific variance for Carbon
+Sp.N <- exp(df_filtrado[, c(38:74)] + sig_d15N) # Individual-specific variance for Nitrogen
 str(Sp.C)
 str(Sp.N)
+
+
 
 # ========== RESHAPE DATA FOR VISUALIZATION ==========
 
@@ -177,7 +195,10 @@ nrow(df_N) # Should be 296,000 rows (8000 posterior samples × 37 individuals)
 nrow(df_Carbon) # Should be 296,000 rows
 
 # Create isotope type identifier (Nitrogen first, then Carbon)
-Isotope <- factor(c(rep("Nitrogen", 296000), rep("Carbon", 296000)))
+Isotope <- factor(c(
+  rep("Nitrogen", 37 * nrow(df_filtrado)),
+  rep("Carbon", 37 * nrow(df_filtrado))
+))
 
 # Create dataframe with isotope labels
 df_largo4 <- data.frame(Isotope = Isotope)

@@ -128,10 +128,23 @@ df_filtrado <- comunidad1 %>%
   select(starts_with("r_species__sigma_d"))
 
 # Back-transform rIIV from log scale to original variance scale
-# Reference: Hertel & Niemelä (2020) - guide for studying among-individual behavioral variation
-community.sp <- exp(df_filtrado)
-Sp.C <- community.sp[, c(1:10)] # Species 1-10 for Carbon
-Sp.N <- community.sp[, c(11:20)] # Species 1-10 for Nitrogen
+ fix_coef <- fixef(model, summary = TRUE)[, 1]
+
+  # Get population-level within-unit SD for Carbon
+  sig_d13C <- select(data.frame(t(fix_coef)), starts_with("sigma_d13C")) %>%
+    fn_int() %>%
+    unlist()
+
+  # Get population-level within-unit SD for Nitrogen
+  sig_d15N <- select(data.frame(t(fix_coef)), starts_with("sigma_d15N")) %>%
+    fn_int() %>%
+    unlist()
+
+# Extract fixed effects for later use in back-transformation
+# Back-transform rIIV from log scale to original scale
+# In DHGLMs, sigma is modeled on log scale, so exp() returns to sd scale
+Sp.C <- exp(df_filtrado[, c(1:10)] + sig_d13C) # Species 1-10 for Carbon
+Sp.N <- exp(df_filtrado[, c(11:20)] + sig_d15N) # Species 1-10 for Nitrogen
 
 # Reshape Carbon data from wide to long format
 df_Carbon <- Sp.C %>%
@@ -140,7 +153,7 @@ df_Carbon <- Sp.C %>%
     names_to = "Sp", # Species identifier
     values_to = "Intraindividual Variance" # Within-species variance
   ) %>%
-  mutate(Sp = gsub("r_species__sigma_d13c\\[|,Intercept\\]", "", Sp)) %>%
+  mutate(Sp = gsub("r_species__sigma_d13C\\[|,Intercept\\]", "", Sp)) %>%
   arrange(Sp) # Sort by species
 
 df_Carbon <- as.data.frame(df_Carbon)
@@ -154,7 +167,7 @@ df_Nitrogen <- Sp.N %>%
     names_to = "Sp",
     values_to = "Intraindividual Variance"
   ) %>%
-  mutate(Sp = gsub("r_species__sigma_d15n\\[|,Intercept\\]", "", Sp)) %>%
+  mutate(Sp = gsub("r_species__sigma_d15N\\[|,Intercept\\]", "", Sp)) %>%
   arrange(Sp) # Sort by species
 
 df_N <- as.data.frame(df_Nitrogen)
@@ -162,7 +175,7 @@ df_N$Sp <- as.factor(df_N$Sp)
 
 # Combine Carbon and Nitrogen data
 alls <- rbind(df_N, df_Carbon)
-Isotope <- factor(c(rep("Nitrogen", 8000), rep("Carbon", 8000))) # 8000 posterior samples per isotope
+Isotope <- factor(c(rep("Nitrogen", 10 * nrow(df_filtrado)), rep("Carbon", 10 * nrow(df_filtrado)))) # 10 * nrow(df_filtrado) posterior samples per isotope
 
 # Create dataframe with isotope labels
 df_largo4 <- data.frame(Isotope = Isotope)
